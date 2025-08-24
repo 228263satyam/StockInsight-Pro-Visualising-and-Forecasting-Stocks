@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forecasting</title>
+    <!-- Google Fonts for Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Chart.js Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #0056b3;
+            --background-color: #f4f4f4;
+            --navbar-color: #007bff;
+            --text-color: #333;
+            --light-text: #fff;
+            --error-color: #ff4d4d;
+            --border-color: #ccc;
+            --input-border-focus: #007bff;
+            --button-hover-color: #0056b3;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --suggestion-hover-bg: #f0f0f0;
+            --alert-color: #28a745;
+        }
+
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: var(--navbar-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--light-text);
+            box-shadow: 0px 4px 10px var(--shadow-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar ul li {
+            margin-left: 25px;
+        }
+
+        .navbar ul li a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-size: 18px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar ul li a:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px var(--shadow-color);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            display: flex;
+            margin-bottom: 25px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px 0 0 5px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .search-bar button {
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .search-bar button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Suggestions Dropdown */
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            z-index: 10;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0px 4px 10px var(--shadow-color);
+        }
+
+        .suggestions li {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .suggestions li:hover {
+            background-color: var(--suggestion-hover-bg);
+        }
+
+        /* Time Frame Selector */
+        .time-frame-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .time-frame-selector button {
+            padding: 10px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f4f4f4;
+            color: var(--text-color);
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .time-frame-selector button.active,
+        .time-frame-selector button:hover {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            transform: scale(1.05);
+        }
+
+        /* Charts */
+        canvas {
+            margin-top: 30px;
+        }
+
+        /* Stock Info */
+        .stock-info {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0px 2px 10px var(--shadow-color);
+        }
+
+        .stock-info h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .stock-info p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error-color);
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* Notifications Section */
+        .notifications {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0px 2px 10px var(--shadow-color);
+        }
+
+        .notifications h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .notifications input {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            margin-right: 10px;
+            width: calc(100% - 160px);
+            max-width: 300px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .notifications input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .notifications button {
+            padding: 10px 25px;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 16px;
+        }
+
+        .notifications button:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .navbar ul li {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar input,
+            .search-bar button {
+                width: 100%;
+                border-radius: 5px;
+            }
+
+            .search-bar button {
+                margin: 10px 0 0 0;
+            }
+
+            .time-frame-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .time-frame-selector button {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .notifications input {
+                width: 100%;
+                max-width: none;
+                margin-bottom: 10px;
+            }
+
+            .notifications button {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation bar -->
+    <header class="navbar">
+        <h2>Advanced Forecasting</h2>
+        <ul>
+            <li><a href="home.php">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="http://localhost:8501/">Market Analysis</a></li>
+        </ul>
+    </header>
+
+    <div class="container">
+        <!-- Search Bar with Auto-Suggest -->
+        <div class="search-bar">
+            <input type="text" id="stock-symbol" placeholder="Enter company name (e.g., Apple)">
+            <button onclick="fetchStockData()">Search</button>
+            <ul id="suggestions" class="suggestions"></ul>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-spinner" id="loading-spinner">Loading...</div>
+
+        <!-- Time Frame Selector -->
+        <div class="time-frame-selector">
+            <button id="1d" onclick="changeTimeFrame('1d')" class="active">1 Day</button>
+            <button id="1w" onclick="changeTimeFrame('1w')">1 Week</button>
+            <button id="1m" onclick="changeTimeFrame('1m')">1 Month</button>
+            <button id="custom" onclick="selectCustomTimeFrame()">Custom</button>
+        </div>
+
+        <!-- Stock Charts -->
+        <canvas id="stockChart"></canvas>
+        <canvas id="volumeChart"></canvas>
+        <canvas id="openCloseChart"></canvas>
+        <canvas id="movingAvgChart"></canvas>
+        <canvas id="forecastChart"></canvas>
+
+        <!-- Stock Info -->
+        <div class="stock-info">
+            <h2>Stock Information</h2>
+            <p><strong>Opening Price:</strong> <span id="opening-price">N/A</span></p>
+            <p><strong>Closing Price:</strong> <span id="closing-price">N/A</span></p>
+            <p><strong>Market Cap:</strong> <span id="market-cap">N/A</span></p>
+            <p><strong>P/E Ratio:</strong> <span id="pe-ratio">N/A</span></p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="error-message"></div>
+
+        <!-- Notifications Section -->
+        <div class="notifications">
+            <h2>Set Price Alert</h2>
+            <input type="number" id="price-alert" placeholder="Enter price to alert">
+            <button onclick="setPriceAlert()">Set Alert</button>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = '66d54bc69b7495.36255126'; // Replace with your Alpha Vantage API Key
+        let stockData = {};
+        let chartInstances = {};
+        let currentSymbol = "";
+        let currentTimeFrame = "1d";
+        let priceAlert = null;
+
+        // Fetch Stock Data
+        function fetchStockData() {
+            if (!currentSymbol) {
+                alert("Please select a company from the suggestions!");
+                return;
+            }
+
+            // Show loading spinner and hide any error message
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('error-message').textContent = '';
+
+            const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${currentSymbol}&apikey=${API_KEY}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    if (data["Time Series (Daily)"]) {
+                        stockData = data["Time Series (Daily)"];
+                        updateCharts();
+                        updateStockInfo();
+                        checkPriceAlert(); // Check if price alert should trigger
+                    } else {
+                        document.getElementById('error-message').textContent = "Invalid symbol or API limit reached.";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading-spinner').style.display = 'none';
+                    console.error("Error fetching stock data:", error);
+                    document.getElementById('error-message').textContent = "An error occurred while fetching the stock data.";
+                });
+        }
+
+        // Fetch symbol suggestions as user types
+        document.getElementById('stock-symbol').addEventListener('input', function () {
+            const query = this.value.trim();
+            const suggestions = document.getElementById('suggestions');
+            suggestions.innerHTML = '';
+
+            if (query.length > 2) {
+                const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.bestMatches) {
+                            data.bestMatches.forEach(match => {
+                                const li = document.createElement('li');
+                                li.textContent = `${match['2. name']} (${match['1. symbol']})`;
+                                li.addEventListener('click', () => {
+                                    document.getElementById('stock-symbol').value = match['2. name'];
+                                    currentSymbol = match['1. symbol'];
+                                    suggestions.innerHTML = '';
+                                    fetchStockData();
+                                });
+                                suggestions.appendChild(li);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching symbol suggestions:", error);
+                    });
+            }
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.search-bar')) {
+                document.getElementById('suggestions').innerHTML = '';
+            }
+        });
+
+        // Update the charts based on the fetched stock data
+        function updateCharts() {
+            const labels = [];
+            const closingPrices = [];
+            const openingPrices = [];
+            const volumes = [];
+            const movingAverages = [];
+
+            let sliceCount;
+            if (currentTimeFrame === '1d') {
+                sliceCount = 1;
+            } else if (currentTimeFrame === '1w') {
+                sliceCount = 7;
+            } else if (currentTimeFrame === '1m') {
+                sliceCount = 30;
+            } else if (typeof currentTimeFrame === 'number') {
+                sliceCount = currentTimeFrame;
+            } else {
+                sliceCount = 30; // Default to 1 month
+            }
+
+            const timeFrameData = Object.keys(stockData).slice(0, sliceCount).reverse();
+
+            timeFrameData.forEach((date, index) => {
+                labels.push(date);
+                closingPrices.push(parseFloat(stockData[date]["4. close"]));
+                openingPrices.push(parseFloat(stockData[date]["1. open"]));
+                volumes.push(parseFloat(stockData[date]["5. volume"]));
+
+                // Calculate 20-day moving average (if enough data)
+                if (index >= 19) {
+                    const avg = closingPrices.slice(index - 19, index + 1).reduce((a, b) => a + b, 0) / 20;
+                    movingAverages.push(avg.toFixed(2));
+                } else {
+                    movingAverages.push(null);
+                }
+            });
+
+            // Get contexts
+            const ctx1 = document.getElementById('stockChart').getContext('2d');
+            const ctx2 = document.getElementById('volumeChart').getContext('2d');
+            const ctx3 = document.getElementById('openCloseChart').getContext('2d');
+            const ctx4 = document.getElementById('movingAvgChart').getContext('2d');
+            const ctx5 = document.getElementById('forecastChart').getContext('2d');
+
+            // Destroy existing chart instances before creating new ones
+            if (chartInstances.stockChart) chartInstances.stockChart.destroy();
+            if (chartInstances.volumeChart) chartInstances.volumeChart.destroy();
+            if (chartInstances.openCloseChart) chartInstances.openCloseChart.destroy();
+            if (chartInstances.movingAvgChart) chartInstances.movingAvgChart.destroy();
+            if (chartInstances.forecastChart) chartInstances.forecastChart.destroy();
+
+            // Stock Price Chart
+            chartInstances.stockChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Closing Price (${currentSymbol})`,
+                        data: closingPrices,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Closing Price',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'x',
+                                drag: false,
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            }
+                        }
+                    }
+                },
+            });
+
+            // Volume Chart
+            chartInstances.volumeChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Volume Traded (${currentSymbol})`,
+                        data: volumes,
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Volume Traded',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Volume'
+                            }
+                        }
+                    }
+                },
+            });
+
+            // Open vs Close Price Chart
+            chartInstances.openCloseChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Opening Price (${currentSymbol})`,
+                            data: openingPrices,
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: `Closing Price (${currentSymbol})`,
+                            data: closingPrices,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 3,
+                            pointHoverRadius: 6
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Opening vs Closing Price',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'x',
+                                drag: false,
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            }
+                        }
+                    }
+                },
+            });
+
+            // Moving Average Chart
+            chartInstances.movingAvgChart = new Chart(ctx4, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `20-day Moving Average (${currentSymbol})`,
+                        data: movingAverages,
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '20-Day Moving Average',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'x',
+                                drag: false,
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            }
+                        }
+                    }
+                },
+            });
+
+            // Forecast Chart (Advanced Forecasting Placeholder)
+            const forecastData = [...closingPrices].map((price, index) => {
+                return price * (1 + (index / closingPrices.length) * 0.05); // Placeholder: 5% incremental forecast
+            });
+
+            chartInstances.forecastChart = new Chart(ctx5, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Forecasted Prices (${currentSymbol})`,
+                        data: forecastData,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Forecasted Prices',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                            },
+                            zoom: {
+                                enabled: true,
+                                mode: 'x',
+                                drag: false,
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            }
+                        }
+                    }
+                },
+            });
+        }
+
+        // Update stock information
+        function updateStockInfo() {
+            const latestDate = Object.keys(stockData)[0];
+            const latestData = stockData[latestDate];
+            document.getElementById('opening-price').textContent = `$${parseFloat(latestData["1. open"]).toFixed(2)}`;
+            document.getElementById('closing-price').textContent = `$${parseFloat(latestData["4. close"]).toFixed(2)}`;
+            // Mock Market Cap and P/E ratio (replace with real API if available)
+            document.getElementById('market-cap').textContent = "$500B";
+            document.getElementById('pe-ratio').textContent = "30";
+        }
+
+        // Change time frame
+        function changeTimeFrame(timeFrame) {
+            currentTimeFrame = timeFrame;
+
+            // Update active button
+            const buttons = document.querySelectorAll('.time-frame-selector button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(timeFrame).classList.add('active');
+
+            updateCharts();
+        }
+
+        // Set custom timeframe
+        function selectCustomTimeFrame() {
+            const days = prompt("Enter number of days to display:");
+            if (days && !isNaN(days) && days > 0) {
+                currentTimeFrame = parseInt(days);
+
+                // Update active button
+                const buttons = document.querySelectorAll('.time-frame-selector button');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                document.getElementById('custom').classList.add('active');
+
+                updateCharts();
+            } else {
+                alert("Please enter a valid number of days.");
+            }
+        }
+
+        // Set price alert
+        function setPriceAlert() {
+            const alertPrice = parseFloat(document.getElementById('price-alert').value);
+            if (isNaN(alertPrice) || alertPrice <= 0) {
+                alert("Please enter a valid price.");
+            } else if (!currentSymbol) {
+                alert("Please select a company first.");
+            } else {
+                priceAlert = alertPrice;
+                alert(`Price alert set for ${currentSymbol} at $${alertPrice.toFixed(2)}`);
+            }
+        }
+
+        // Check price alert when stock data updates
+        function checkPriceAlert() {
+            if (priceAlert !== null && currentSymbol) {
+                const latestClosePrice = parseFloat(stockData[Object.keys(stockData)[0]]["4. close"]);
+                if (latestClosePrice >= priceAlert) {
+                    alert(`Price alert triggered! ${currentSymbol} has reached $${latestClosePrice.toFixed(2)}`);
+                    priceAlert = null; // Reset alert
+                }
+            }
+        }
+
+        // Optional: Periodically check for price alerts (e.g., every minute)
+        // setInterval(checkPriceAlert, 60000); // Uncomment to enable
+    </script>
+
+</body>
+
+</html>

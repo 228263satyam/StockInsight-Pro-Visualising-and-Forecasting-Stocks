@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockInsight Pro - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('stock.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            background-blend-mode: darken;
+        }
+
+        header {
+            position: relative;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .header-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-buttons a {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .header-buttons a:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        header h1 {
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        #search-bar {
+            width: 50%;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        #search-bar input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #stock-table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #stock-table th, #stock-table td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        #stock-table th {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-size: 1.2em;
+        }
+
+        #stock-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .stock-info-row {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .stock-info {
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-around;
+            gap: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stock-info img {
+            max-width: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .stock-details {
+            text-align: left;
+            max-width: 500px;
+        }
+
+        .stock-details p {
+            margin: 5px 0;
+        }
+
+        .stock-chart-container {
+            max-width: 500px;
+            height: 400px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Header with Home Button, Market Analysis, and Forecasting Buttons -->
+    <header>
+        <h1>Stock Dashboard</h1>
+        <div class="header-buttons">
+            <a href="home.php" id="home-button">Home</a>
+            <a href="http://localhost:8501/" id="market-analysis-button">Market Analysis</a>
+            <a href="forecasting.html" id="forecasting-button">Forecasting</a>
+        </div>
+    </header>
+
+    <div id="search-bar">
+        <input type="text" id="stock-search" placeholder="Search for a stock symbol (e.g., AAPL, MSFT)">
+    </div>
+
+    <table id="stock-table">
+        <thead>
+            <tr>
+                <th>Stock Image</th>
+                <th>Stock Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Stock rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stockSymbols = [
+                'AAPL', 'GOOGL', 'AMZN', 'MSFT', 'TSLA',
+                'NFLX', 'META', 'NVDA', 'BABA', 'V',
+                'JNJ', 'JPM', 'WMT', 'PG', 'DIS', 'F',
+                'IBM','AXP','BIIB','MA','WFC','WMT','NKE',
+                'KO','PG','RDS','PSX','XOMS','FDX','RIVN',
+                'SO','DUK','NEE','AMT','SPG','SHOP'
+            ];
+
+            const apiKeyAlphaVantage = '66cdba10983a40';
+            const apiKeyFinancialModelingPrep = 'oOWUNifC6H0t4GGCmtqEHc60rerX5eE9';
+
+            const stockTable = document.getElementById('stock-table').querySelector('tbody');
+            const searchInput = document.getElementById('stock-search');
+
+            function fetchStockInfo(stockSymbol) {
+                fetch(`https://financialmodelingprep.com/api/v3/profile/${stockSymbol}?apikey=${apiKeyFinancialModelingPrep}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const stock = data[0];
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><img src="${stock.image}" alt="${stock.companyName}" width="50"></td>
+                                <td>${stock.companyName}</td>
+                                <td>$${stock.price}</td>
+                            `;
+                            row.addEventListener('click', function() {
+                                displayStockInfo(stock, row);
+                                fetchStockChartAlphaVantage(stock.symbol);
+                            });
+                            stockTable.appendChild(row);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching stock information:', error));
+            }
+
+            function displayStockInfo(stock, row) {
+                const existingInfoRow = document.querySelector('.stock-info-row');
+                if (existingInfoRow) {
+                    existingInfoRow.remove();
+                }
+
+                const infoRow = document.createElement('tr');
+                infoRow.classList.add('stock-info-row');
+                const infoCell = document.createElement('td');
+                infoCell.setAttribute('colspan', '3');
+                infoCell.innerHTML = `
+                    <div class="stock-info">
+                        <img src="${stock.image}" alt="${stock.companyName}">
+                        <div class="stock-details">
+                            <p><strong>Owner:</strong> ${stock.ceo}</p>
+                            <p><strong>Price:</strong> $${stock.price}</p>
+                            <p><strong>Industry:</strong> ${stock.industry}</p>
+                            <p><strong>Website:</strong> <a href="${stock.website}" target="_blank">${stock.website}</a></p>
+                            <p><strong>Description:</strong> ${stock.description}</p>
+                        </div>
+                        <div class="stock-chart-container">
+                            <canvas id="stock-chart"></canvas>
+                        </div>
+                    </div>
+                `;
+                infoRow.appendChild(infoCell);
+
+                row.parentNode.insertBefore(infoRow, row.nextSibling);
+                infoRow.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            function fetchStockChartAlphaVantage(stockSymbol) {
+                fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockSymbol}&apikey=${apiKeyAlphaVantage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const timeSeries = data['Time Series (Daily)'];
+                        if (!timeSeries) {
+                            console.error('Error: No data returned from Alpha Vantage API');
+                            return;
+                        }
+
+                        const dates = Object.keys(timeSeries).slice(0, 30).reverse();
+                        const prices = dates.map(date => timeSeries[date]['4. close']);
+
+                        const ctx = document.getElementById('stock-chart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: dates,
+                                datasets: [{
+                                    label: `${stockSymbol} Stock Price`,
+                                    data: prices,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time: {
+                                            unit: 'day'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching stock chart:', error));
+            }
+
+            function filterStocks() {
+                const searchTerm = searchInput.value.toUpperCase();
+                const rows = stockTable.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    const stockName = rows[i].getElementsByTagName('td')[1].textContent;
+                    if (stockName.toUpperCase().indexOf(searchTerm) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+
+            searchInput.addEventListener('input', filterStocks);
+
+            stockSymbols.forEach(stockSymbol => fetchStockInfo(stockSymbol));
+        });
+    </script>
+</body>
+</html>

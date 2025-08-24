@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockInsight Pro - Contact Us</title>
+    <!-- Font Awesome CDN for social media icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .site-title {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1em;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 0;
+                background-color: #333;
+                width: 100%;
+                height: calc(100vh - 60px);
+                transform: translateX(100%);
+                padding-top: 20px;
+            }
+
+            nav ul.show {
+                transform: translateX(0%);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Main Content Styles */
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .tab:hover {
+            background-color: #ddd;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button[type="submit"] {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .feedback-list {
+            margin-top: 30px;
+        }
+
+        .feedback-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .feedback-item p {
+            margin: 0;
+        }
+
+        .contact-info {
+            line-height: 2;
+        }
+
+        .contact-info p {
+            margin: 5px 0;
+        }
+
+        .social-links a {
+            margin-right: 10px;
+            text-decoration: none;
+            font-size: 1.5em;
+            color: #4CAF50;
+        }
+
+        .social-links a:hover {
+            color: #333;
+        }
+
+        .social-links .fa-facebook {
+            color: #3b5998;
+        }
+
+        .social-links .fa-twitter {
+            color: #1da1f2;
+        }
+
+        .social-links .fa-linkedin {
+            color: #0077b5;
+        }
+
+        footer {
+            background-color: #4CAF50;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="logo.png" alt="StockInsight Pro Logo" class="logo">
+                <span class="site-title">StockInsight Pro</span>
+            </div>
+            <nav>
+                <ul id="navList">
+                    <li><a href="home.php">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="http://localhost:8501/">Market Analysis</a></li>
+                    <li><a href="forecasting.html">Forecasting</a></li>
+                    <li><a href="about_us.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+
+                </ul>
+                <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h1>Contact Us</h1>
+
+        <!-- Tabs for Contact Info and Send Message -->
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('contactInfo')">Contact</div>
+            <div class="tab" onclick="showSection('sendMessage')">Send Message</div>
+        </div>
+
+        <!-- Contact Info Section -->
+        <div id="contactInfo" class="content-section active">
+            <h2>Admin Contact Information</h2>
+            <div class="contact-info">
+                <p><strong>Email:</strong> yadavsatyam898@gmail.com</p>
+                <p><strong>Phone:</strong> 7208441899</p>
+                <p><strong>Location:</strong> 123 Market Street, Financial City, FC 12345</p>
+                <div class="social-links">
+                    <p><strong>Connect with us:</strong></p>
+                    <a href="https://www.facebook.com/profile.php?id=100024224862958" target="_blank" class="fab fa-facebook"></a>
+                    <a href="https://x.com/Satyam_30_" target="_blank" class="fab fa-twitter"></a>
+                    <a href="https://www.linkedin.com/in/satyam-yadav-411936235/?trk=public-profile-join-page" target="_blank" class="fab fa-linkedin"></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send Message Section -->
+        <div id="sendMessage" class="content-section">
+            <h2>Send Us a Message</h2>
+            <form id="feedbackForm">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" required></textarea>
+
+                <button type="submit">Submit Feedback</button>
+            </form>
+
+            <div class="feedback-list" id="feedbackList">
+                <h2>Feedback List</h2>
+                <!-- Feedback items will be added here -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 StockInsight Pro. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show the selected section and activate the corresponding tab
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`.tab[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        }
+
+        document.getElementById('feedbackForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'feedback-item';
+
+            const feedbackContent = `
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Message:</strong> ${message}</p>
+            `;
+
+            feedbackItem.innerHTML = feedbackContent;
+            document.getElementById('feedbackList').appendChild(feedbackItem);
+
+            // Clear the form fields after submission
+            document.getElementById('feedbackForm').reset();
+        });
+
+        function toggleMenu() {
+            const navList = document.getElementById('navList');
+            navList.classList.toggle('show');
+        }
+    </script>
+</body>
+
+</html>

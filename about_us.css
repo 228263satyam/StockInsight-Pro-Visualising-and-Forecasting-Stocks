@@ -1,0 +1,150 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    position: relative;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.site-title {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+    transition: transform 0.3s ease-in-out;
+}
+
+nav ul li {
+    display: inline;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: none;
+}
+
+/* Responsive Navigation Menu */
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background-color: #333;
+        width: 100%;
+        height: calc(100vh - 60px);
+        transform: translateX(100%);
+        padding-top: 20px;
+    }
+
+    nav ul.show {
+        transform: translateX(0%);
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
+/* Main Content Styles */
+main {
+    width: 90%;
+    margin: 10px auto;
+    padding: 10px;
+    background: rgba(7, 199, 238, 0.8);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.about-section {
+    background-image: url('about_us_background1.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 50px 20px;
+    color: rgb(9, 0, 0);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.about-section h1 {
+    color:yellow ;
+    margin-bottom: 20px;
+}
+
+.about-section h2 {
+    color:yellow;
+    margin-top: 20px;
+}
+
+.about-section p {
+    margin-bottom: 15px;
+    line-height: 1.8;
+    color: white;
+}
+
+.about-section ul {
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.about-section ul li {
+    margin-bottom: 10px;
+    color: white;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #4CAF50;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+}
